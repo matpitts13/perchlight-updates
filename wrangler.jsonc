@@ -1,0 +1,44 @@
+// perchlight-updates: Worker + R2 (files) + D1 (releases, stats).
+// The one secret, ADMIN_TOKEN, is never set here. Locally it goes in .dev.vars
+// (see .dev.vars.example); in production: npx wrangler secret put ADMIN_TOKEN
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "perchlight-updates",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-01",
+
+  // Installers, blockmaps and each release's own feed files.
+  "r2_buckets": [{ "binding": "FILES", "bucket_name": "perchlight-updates" }],
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "perchlight-updates",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // Once a day: delete the files of releases older than the newest KEEP_RELEASES
+  // per channel, and abandoned uploads.
+  "triggers": { "crons": ["17 4 * * *"] },
+
+  "vars": {
+    // Shown on the downloads page at /.
+    "APP_NAME": "My App",
+    // How many releases per channel keep their files (the live one included).
+    // Older releases' files are deleted, to stay inside R2's free 10 GB.
+    "KEEP_RELEASES": "3",
+    // "true": count update checks per day. Each check is one D1 write, and
+    // D1's free plan allows 100,000 a day, so turn this off for big apps.
+    "COUNT_CHECKS": "true",
+    // "true": serve files in the bucket that no release manages (for example
+    // an older setup's installers and blockmaps at the bucket root) as-is.
+    "SERVE_UNMANAGED": "false",
+    // "true": show a downloads page at / for the latest channel.
+    "DOWNLOADS_PAGE": "true"
+  }
+
+  // Your own domain (for example downloads.example.com), once it works on
+  // workers.dev:
+  // "routes": [{ "pattern": "downloads.example.com", "custom_domain": true }]
+}

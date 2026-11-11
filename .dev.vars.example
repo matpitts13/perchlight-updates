@@ -1,0 +1,5 @@
+# Copy to .dev.vars for local development (`npm run dev`). Never commit .dev.vars.
+# In production: npx wrangler secret put ADMIN_TOKEN
+
+# A long random string. The publish tool sends it to upload and publish releases.
+ADMIN_TOKEN=

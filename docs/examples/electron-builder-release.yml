@@ -1,0 +1,69 @@
+# Example: build an Electron app with electron-builder on a version tag, then
+# publish it to perchlight-updates. Copy into your app's .github/workflows/.
+#
+# Secrets to add in your app's repo (Settings -> Secrets and variables -> Actions):
+#   PERCHLIGHT_UPDATES_URL    your server, e.g. https://downloads.example.com
+#   PERCHLIGHT_UPDATES_TOKEN  its ADMIN_TOKEN
+#
+# Your electron-builder config needs:
+#   publish: { provider: "generic", url: "https://downloads.example.com" }
+#
+# Builds are passed between jobs as Actions artifacts, kept for 1 day (the
+# minimum). On a private repo they count toward your Actions storage (0.5 GB
+# free) while they exist; on a public repo they're free.
+
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx electron-builder --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.os }}
+          retention-days: 1
+          path: |
+            dist/*.exe
+            dist/*.dmg
+            dist/*.zip
+            dist/*.AppImage
+            dist/*.deb
+            dist/*.rpm
+            dist/*.blockmap
+            dist/latest*.yml
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          repository: matpitts13/perchlight-updates
+          path: perchlight-updates
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          path: release
+          merge-multiple: true
+      - name: Publish
+        env:
+          PERCHLIGHT_UPDATES_URL: ${{ secrets.PERCHLIGHT_UPDATES_URL }}
+          PERCHLIGHT_UPDATES_TOKEN: ${{ secrets.PERCHLIGHT_UPDATES_TOKEN }}
+        # Add --rollout 10 to start with 10% of users, or --channel beta.
+        run: node perchlight-updates/cli/perchlight-updates.mjs publish release

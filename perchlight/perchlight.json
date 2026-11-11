@@ -1,0 +1,80 @@
+{
+  "$schema": "https://perchlight.ravenburst.com/schema/v1.json",
+  "version": 1,
+  "views": [
+    {
+      "id": "updates-releases",
+      "title": "Releases",
+      "source": { "type": "d1", "database": "YOUR-D1-DATABASE-ID", "table": "releases" },
+      "columns": [
+        { "label": "Channel", "from": "channel" },
+        { "label": "Version", "from": "version" },
+        { "label": "State", "from": "state", "type": "enum", "options": ["draft", "live", "superseded", "pulled", "expired"] },
+        { "label": "Rollout %", "from": "rollout", "type": "number", "editable": true },
+        { "label": "Published", "from": "published_at", "type": "date" },
+        { "label": "Pulled", "from": "pulled_at", "type": "date" },
+        { "label": "Notes", "from": "notes", "hidden": true }
+      ]
+    },
+    {
+      "id": "updates-files",
+      "title": "Release files",
+      "source": { "type": "d1", "database": "YOUR-D1-DATABASE-ID", "table": "release_files" },
+      "columns": [
+        { "label": "Release", "from": "release_id", "type": "number" },
+        { "label": "Name", "from": "name" },
+        { "label": "Kind", "from": "kind", "type": "enum", "options": ["feed", "file"] },
+        { "label": "Platform", "from": "platform" },
+        { "label": "Bytes", "from": "size", "type": "number" }
+      ]
+    },
+    {
+      "id": "updates-downloads",
+      "title": "Downloads per day",
+      "source": { "type": "d1", "database": "YOUR-D1-DATABASE-ID", "table": "downloads_daily" },
+      "columns": [
+        { "label": "Day", "from": "day", "type": "date" },
+        { "label": "Release", "from": "release_id", "type": "number" },
+        { "label": "File", "from": "file_name" },
+        { "label": "Source", "from": "source" },
+        { "label": "Downloads", "from": "count", "type": "count" }
+      ]
+    },
+    {
+      "id": "updates-checks",
+      "title": "Update checks per day",
+      "source": { "type": "d1", "database": "YOUR-D1-DATABASE-ID", "table": "checks_daily" },
+      "columns": [
+        { "label": "Day", "from": "day", "type": "date" },
+        { "label": "Channel", "from": "channel" },
+        { "label": "Platform", "from": "platform" },
+        { "label": "Source", "from": "source" },
+        { "label": "Checks", "from": "count", "type": "count" }
+      ]
+    },
+    {
+      "id": "updates-channels",
+      "title": "Channels",
+      "source": { "type": "d1", "database": "YOUR-D1-DATABASE-ID", "table": "channels" },
+      "columns": [
+        { "label": "Name", "from": "name" },
+        { "label": "Private", "from": "private", "type": "boolean", "editable": true },
+        { "label": "Releases kept", "from": "keep", "type": "number", "editable": true }
+      ]
+    },
+    {
+      "id": "updates-links",
+      "title": "Private feed links",
+      "source": { "type": "d1", "database": "YOUR-D1-DATABASE-ID", "table": "feed_tokens" },
+      "columns": [
+        { "label": "Id", "from": "id", "type": "number" },
+        { "label": "Label", "from": "label" },
+        { "label": "Channel", "from": "channel" },
+        { "label": "Active", "from": "active", "type": "boolean" },
+        { "label": "Created", "from": "created_at", "type": "date" },
+        { "label": "Hash", "from": "token_hash", "hidden": true }
+      ],
+      "actions": [{ "label": "Switch off", "confirm": true, "set": { "active": 0 } }]
+    }
+  ]
+}

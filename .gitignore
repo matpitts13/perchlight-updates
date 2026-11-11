@@ -1,0 +1,16 @@
+node_modules/
+.wrangler/
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.env
+.env.*
+dist/
+coverage/
+*.log
+.DS_Store
+Thumbs.db
+graphify-out/
+e2e/node_modules/
+e2e/out/
+e2e/dist/

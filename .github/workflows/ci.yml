@@ -1,0 +1,35 @@
+name: CI
+
+# Free on public repos (GitHub-hosted runners). Kept lean anyway: runs only
+# for main and pull requests, skips docs-only changes, and cancels an older
+# run of the same branch when a newer push arrives.
+on:
+  workflow_dispatch: # a Run workflow button in the Actions tab
+  push:
+    branches: [main]
+    paths-ignore: ["**.md", "docs/**", "LICENSE"]
+  pull_request:
+    paths-ignore: ["**.md", "docs/**", "LICENSE"]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=high
+      - run: npm test
+      - name: Check the Worker bundles
+        run: npx wrangler deploy --dry-run --outdir dist

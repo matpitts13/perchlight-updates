@@ -1,0 +1,32 @@
+{
+  "name": "perchlight-updates",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A free, self-hosted update server for desktop apps on Cloudflare Workers + R2 + D1: auto-update feeds for Electron and Tauri, channels, gradual rollouts, pulling a bad release, private beta feeds and download counts.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "perchlight-updates": "cli/perchlight-updates.mjs"
+  },
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler d1 migrations apply DB --remote && wrangler deploy",
+    "test": "vitest run",
+    "cli": "node cli/perchlight-updates.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "cloudflare": {
+    "bindings": {
+      "ADMIN_TOKEN": {
+        "description": "Required. A long random string, e.g. from `openssl rand -hex 32`. Your publish tool and CI use it to upload and publish releases. Keep it secret."
+      }
+    }
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "^1.6.1",
+    "vitest": "^5.1.0",
+    "wrangler": "^4.159.0"
+  }
+}
